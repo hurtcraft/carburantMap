@@ -29,7 +29,6 @@ function createGraphique() {
     }
 
     function convertY(y) {
-        // Convertir les valeurs de y à l'échelle correcte
         return canvas.height - (y / 5) * canvas.height;
     }
 
@@ -42,7 +41,6 @@ function createGraphique() {
         for (let i = 0; i <= 20; i++) {
             let xPosition = (i / 20) * canvas.width;
 
-            // Dessiner la graduation sur l'axe x
             ctx.moveTo(xPosition, canvas.height - 5);
             ctx.lineTo(xPosition, canvas.height + 5);
             ctx.stroke();
@@ -60,7 +58,6 @@ function createGraphique() {
         for (let i = 0; i <= 5; i++) {
             let yPosition = (i / 5) * canvas.height;
 
-            // Dessiner la graduation sur l'axe y
             ctx.moveTo(-5, yPosition);
             ctx.lineTo(5, yPosition);
             ctx.stroke();
@@ -90,17 +87,14 @@ function createGraphique() {
         ctx.fillText("prix € : " + ((canvas.height - mouseY) / canvas.height * 5).toFixed(2), canvas.width / 2 + 10, mouseY + 10);
     }
 
-    // Ajouter l'événement de survol
     canvas.addEventListener("mousemove", showCoordinates);
 
-    // Dessiner la ligne en courbe avec les données
     drawCurve(data);
     drawXAxis();
     drawYAxis();
     div.append(canvas);
     return div;
 }
-// Utilisation de la fonction
 document.body.appendChild(createGraphique());
 
 
