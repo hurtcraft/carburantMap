@@ -1,6 +1,6 @@
 
 import { logoStationVert,logoStationJaune,logoStationRouge } from "./logo.js";
-
+import { createGraphique } from "./graphe.js";
 var latParis = 48.866667;
 var longParis = 2.333333;
 var map = L.map("map").setView([latParis, longParis], 13);
@@ -28,16 +28,14 @@ var geocoder = L.Control.geocoder({
       map.removeLayer(currentPos);
     }
 
-    // Placer un nouveau marqueur sur l'adresse trouvée
     currentPos = new L.marker(e.geocode.center).addTo(map);
 
     map.flyTo(e.geocode.center, 17, {
-      duration: 1.5, // Durée de l'animation en secondes
+      duration: 1.5, 
     });
   })
   .addTo(map);
 
-//L.marker([latParis,longParis]).addTo(map);
 
 const apiUrl =
   "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records";
@@ -95,9 +93,7 @@ function putStationsMarkers(stations, markersCluster) {
   let adresse;
   for (let i = 0; i < stations.length; i++) {
     currentStation = stations[i];
-    //adresse=currentStation.
-    //console.log(currentStation)
-    //console.log(currentStation.latitude)
+
     markers.addLayer(
       L.marker([currentStation.geom.lat, currentStation.geom.lon], {
         icon: logoStationVert,
@@ -115,7 +111,7 @@ function putStationsMarkers(stations, markersCluster) {
 function createTableCarburant(station) {
   let carburantDispo=station.carburants_disponibles;
   if(carburantDispo===null){
-    return "Information indisponible ¯\\_(ツ)_/¯";
+    return "Information carburant indisponible ¯\\_(ツ)_/¯";
   }
   let table = document.createElement("table");
   let headerRow = document.createElement("tr");
@@ -175,12 +171,110 @@ function createVignette(station){
   let vignette=document.createElement("div");
   let adresse=createAdresse(station);
   let tableCarburant = createTableCarburant(station);
+  let automate=automate2424(station);
+  let graph=createGraphique();
+
 
 
   vignette.append(adresse);
   vignette.append(tableCarburant);
+  vignette.append(automate);
+  vignette.append(graph);
 
   return vignette;
+}
+
+function automate2424(station){
+  let isAuto=station.horaires_automate_24_24;
+  let p = document.createElement("p")
+
+  if(isAuto!=null){
+    p.innerText="Borne automatique 24/24 : "+isAuto
+  }
+  else{
+    p.innerText="pas d'informations :/"
+  }
+  return p;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function createHorraires(station) {
+  
+  //donnée trop peu détailler ne pas utiliser 
+  if(station.horaires===null){
+    return;
+  }
+  else{
+  }
+  let horraires = JSON.parse(station.horaires);
+  console.log(horraires)
+  let horraireDiv = document.createElement("div");
+  
+  
+  try {
+    horraires.jour.forEach(jour=> {
+      //console.log(jour["horaire"])
+      if(jour===null){
+        console.log("jour null");
+      }
+      if(jour["@ferme"]==1){
+        let p = document.createElement("p");
+        p.innerText="fermé";
+        horraireDiv.append(p);
+        
+      }
+      else if(jour["horaire"]===undefined){
+        
+        let p = document.createElement("p");
+        p.innerText="no data";
+        horraireDiv.append(p);
+      
+      }
+      else{
+        
+        let heureOuverture=jour.horaire["@ouverture"]
+        //console.log(heureOuverture)
+        var heureFermeture=jour.horaire["@ouverture"]; // Vous pouvez ajouter le code pour obtenir l'heure de fermeture ici
+        
+  
+        var texteJour = jour["@nom"] + " : " + heureOuverture+ " " + heureFermeture;
+  
+  
+        var paragraphe = document.createElement("p");
+  
+  
+        paragraphe.textContent = texteJour;
+        horraireDiv.appendChild(paragraphe);
+      }
+  
+    });
+  } catch (error) {
+    
+  }
+  
+  return horraireDiv;
+
+  
 }
 /*
 
