@@ -11,6 +11,20 @@
 
 #map { 
     height: 100vh;
+    position: relative;
+    
+}
+#selectionCarb{
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 75px;
+    right: 10px;
+    z-index: 9999;
+    background-color:aliceblue;
+    place-items: center;
+    padding: 10px;
+    border-radius: 10px;
 }
 
 

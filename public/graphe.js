@@ -95,7 +95,6 @@ function createGraphique() {
     div.append(canvas);
     return div;
 }
-document.body.appendChild(createGraphique());
 
 
 export{createGraphique}
