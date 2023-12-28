@@ -50,7 +50,7 @@ const apiUrl ="https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/p
 let resultsPerPage = 100;
 let offset = 0;
 let markers = new L.MarkerClusterGroup();
-
+const MAX_QUERY=10000;
 
 function fetchResults() {
   const urlWithPagination = `${apiUrl}?limit=${resultsPerPage}&offset=${offset}`;
@@ -58,34 +58,38 @@ function fetchResults() {
   fetch(urlWithPagination)
     .then((response) => {
       if (!response.ok) {
+        
         throw new Error(
           `La requête n'a pas réussi. Code d'erreur : ${response.status}`
         );
+        
       }
       return response.json();
     })
     .then((data) => {
 
-      console.log("offset : "+offset);
-      let stations = data.results;
-      if(offset>=9999){
-        putStationsMarkers(stations, markers);
-
-        
-      }
-      if (data.total_count-offset>100) {
-        offset += resultsPerPage;
-
-        putStationsMarkers(stations, markers);
-
-        fetchResults();
-      } 
       
+      if(MAX_QUERY-offset>data.total_count-MAX_QUERY){
+        let stations = data.results;
+        offset+=resultsPerPage;
+
+        if(offset==MAX_QUERY-resultsPerPage){
+          resultsPerPage--;
+          putStationsMarkers(stations,markers);
+          fetchResults();
+        }
+        if(offset==MAX_QUERY-1){
+          console.log("fin jeu de donnée");
+          return;
+        }
+        putStationsMarkers(stations,markers);
+        fetchResults();
+      
+      }
 
     })
     .catch((error) => {
       //console.log("offset : "+offset+" rpp : "+resultsPerPage)
-      console.error("Erreur lors de la récupération des données:", error);
     });
 }
 
@@ -126,7 +130,7 @@ radioButtons.forEach(btn=>{
     btn.checked=true
     btn.addEventListener("click",()=>{
         if(btn.checked==true){
-            showMarkers(btn.value,AllMarkers);
+          showMarkers(btn.value,AllMarkers);
         }
         else{
           hideMarkers(btn.value,AllMarkers)

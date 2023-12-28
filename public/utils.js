@@ -1,14 +1,15 @@
 import { createGraphique } from "./graphe.js";
 
-function sortMaker(marker,station,map){
-    let carbDispo=station.carburants_disponibles;
-    if(carbDispo===null){
+function sortMaker(marker_,station,map){
+    let carbDispo_=station.carburants_disponibles;
+    if(carbDispo_===null){
         return;
     }
-    carbDispo.forEach(carb => {
+    carbDispo_.forEach(carb => {
         
         carb=carb.toUpperCase();
-        map[carb].push(marker);
+        map[carb].push({marker:marker_,carbDispo:new Set(upperCaseSet(carbDispo_))});
+        //console.log({marker:marker_,carbDispo:new Set(upperCaseSet(carbDispo_))});
     });
 }
 
@@ -143,17 +144,81 @@ function createHorraires(station) {
   
     return horraireDiv;
   }
+let selectionCarb=document.getElementById("selectionCarb");
 
+let radioButtons=selectionCarb.querySelectorAll("input");
+  
 function showMarkers(nomCarb,map){
-    let lstMarkers=map[nomCarb];
-    for(let i  = 0;i<lstMarkers.length;i++){
-        lstMarkers[i].setOpacity(1);
-    }
+  let lstMarkers=map[nomCarb];
+  let selectedCarb=getSelectedCarb();
+
+  let marker;
+  let carbDispo;
+
+  for(let i = 0; i<lstMarkers.length;i++){
+    marker=lstMarkers[i].marker;
+    carbDispo=lstMarkers[i].carbDispo;
+
+    marker.setOpacity(1);
+  }
+  
+    // for(let i  = 0;i<lstMarkers.length;i++){
+    //     lstMarkers[i].setOpacity(1);
+    // }
 }
 function hideMarkers(nomCarb,map){
+
     let lstMarkers=map[nomCarb];
-    for(let i  = 0;i<lstMarkers.length;i++){
-        lstMarkers[i].setOpacity(0);
-    }
+
+    let selectedCarb=getSelectedCarb();// carburant selectionne
+
+    let marker;
+    let carbDispo;
+
+    
+
+    for(let i = 0 ; i< lstMarkers.length;i++){
+      let flag=false;
+      marker=lstMarkers[i].marker;
+      carbDispo=lstMarkers[i].carbDispo;
+
+      for(let item of carbDispo){
+        if(selectedCarb.has(item)){
+          flag=true;
+        }
+
+      }
+
+      if(!flag){
+        marker.setOpacity(0);
+
+      }
+
+
+    } 
+
+    // let lstMarkers=map[nomCarb];
+    // for(let i  = 0;i<lstMarkers.length;i++){
+    //     lstMarkers[i].setOpacity(0);
+    // }
+}
+
+
+function getSelectedCarb(){
+  let otherCarb=[];
+  radioButtons.forEach(btn=>{
+    if(btn.checked){
+      otherCarb.push(btn.value);
+    }    
+  })
+  return new Set(otherCarb);
+}
+
+function upperCaseSet(set){
+  let res=new Set();
+  for(let item of set){
+    res.add(item.toUpperCase());
+  }
+  return res;
 }
 export{sortMaker,createVignette,showMarkers,hideMarkers}
