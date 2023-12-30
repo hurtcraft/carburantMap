@@ -7,9 +7,9 @@ DROP TABLE IF EXISTS Historique;
 
 CREATE TABLE Station(
    IdStation INT,
-   LonStation INT,
-   LatStation INT,
-   CPStation INT,
+   LonStation DECIMAL(11, 8),
+   LatStation DECIMAL(11, 8),
+   CPStation VARCHAR(5),
    AdresseStation VARCHAR(100),
    PRIMARY KEY(IdStation)
 );

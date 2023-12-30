@@ -66,20 +66,23 @@ function fetchResults() {
     })
     .then((data) => {
 
-      console.log("offset : "+offset);
+      console.log("offset : "+offset+ " resulte par page :"+ resultsPerPage);
       let stations = data.results;
       if(offset>=9999){
         putStationsMarkers(stations, markers);
 
         
       }
+      
       if (data.total_count-offset>100) {
         offset += resultsPerPage;
-
+        if (offset+resultsPerPage >= 9999){
+          resultsPerPage = 9999-offset;
+        }
         putStationsMarkers(stations, markers);
 
         fetchResults();
-      } 
+      }
       
 
     })
@@ -92,6 +95,28 @@ function fetchResults() {
  
 fetchResults();
 
+// function fetchResults() {
+//   for (let i = 0; i < 10000; i += 100){
+//     let urlWithPagination = `${apiUrl}?limit=${resultsPerPage}&offset=${offset}`;
+//     fetch(urlWithPagination)
+//     .then(res => res.json())
+//     .then(data => {
+//       let stations = data.results;
+//       putStationsMarkers(stations, markers);
+
+//     })
+//     .catch((err)=>{
+//       console.log(err);
+//     })
+//     offset = i
+//     if (offset >= 9900){
+//       resultsPerPage--;
+//     }
+//   }
+//   console.log("fin");
+// }
+
+// fetchResults()
 
 function putStationsMarkers(stations, markersCluster) {
   let currentStation;
