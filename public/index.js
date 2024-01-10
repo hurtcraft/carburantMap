@@ -5,6 +5,7 @@ var latParis = 48.866667;
 var longParis = 2.333333;
 var map = L.map("map").setView([latParis, longParis], 13);
 let currentPos = null;
+let buttonlocate= document.getElementById("locate")
 
 let AllMarkers = {
   SP95: [],

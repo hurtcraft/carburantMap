@@ -72,14 +72,14 @@ db.connect((err) => {
     //   }
     // })
 
-    db.query(`DELETE FROM historique WHERE DateCarburant = '${today}'`, (err, results) => {
-      if (err) {
-        console.error('Erreur lors de l\'exécution de la requête :', err);
-        throw err;
-      } else {
-        console.log(results)
-      }
-    })
+    // db.query(`DELETE FROM historique WHERE DateCarburant = '${today}'`, (err, results) => {
+    //   if (err) {
+    //     console.error('Erreur lors de l\'exécution de la requête :', err);
+    //     throw err;
+    //   } else {
+    //     console.log(results)
+    //   }
+    // })
 
   }
 });
