@@ -1,5 +1,14 @@
 import { createGraphique } from "./graphe.js";
 
+const mapNomCarburantToIdCarburant = {
+  SP95 : 1,
+  SP98 : 2,
+  E10 : 3,
+  E85 : 4,
+  GPLC : 5,
+  GAZOLE : 6
+}
+
 function sortMaker(marker_,station,map){
     let carbDispo_=station.carburants_disponibles;
     if(carbDispo_===null){
@@ -54,6 +63,22 @@ function createTableCarburant(station) {
       dataCell2.style.border = "1px solid black";
   
       table.appendChild(dataRow);
+      dataRow.id = mapNomCarburantToIdCarburant[nomCarb.toUpperCase()];
+      dataRow.addEventListener("click", (e) => {
+        table.childNodes.forEach((child) => {
+          child.style.color = "black"
+        })
+        dataRow.style.color = "red";
+        let parentDiv = table.parentElement;
+        let canvaContainer = parentDiv.querySelector(".canvaContainer");
+        canvaContainer.childNodes.forEach((child) => {
+          child.style.visibility = "hidden"
+          if (child.id === `${dataRow.id}`){
+            child.style.visibility = "visible"
+          }
+          
+        })
+      })
     }
   
     // Ajout de bordures aux cellules de données
@@ -76,13 +101,13 @@ function createTableCarburant(station) {
     let adresse = createAdresse(station);
     let tableCarburant = createTableCarburant(station);
     let automate = automate2424(station);
-    let graph = createGraphique();
   
     vignette.append(adresse);
     vignette.append(tableCarburant);
     vignette.append(automate);
-    vignette.append(graph);
   
+    vignette.id = station.id;
+    vignette.className = "vignette";
     return vignette;
   }
   
@@ -221,4 +246,36 @@ function upperCaseSet(set){
   }
   return res;
 }
-export{sortMaker,createVignette,showMarkers,hideMarkers}
+
+
+let today = new Date();
+let todayMinus20 = new Date(`${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`)
+let startOfToday = new Date(`${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`)
+todayMinus20.setDate(todayMinus20.getDate() - 20);
+const msInADay = 86_400_000;
+/**
+ * 
+ * @param {*} dataHistorique 
+ * @returns {Map}
+ */
+function formateDataHistorique(dataHistorique) {
+  let carburantMap = new Map();
+  let i 
+  for (const historique of dataHistorique) {
+    if (!carburantMap.has(historique.IdCarburant)){
+      i = 1;
+      carburantMap.set(historique.IdCarburant, []);
+    }
+    // faire une soustraction de date
+    carburantMap.get(historique.IdCarburant).push({
+      // x: Math.abs(new Date(historique.DateCarburant) - todayMinus20)/msInADay,
+      x: i++,
+      y: historique.PrixCarburant
+    })
+
+  }  
+  return carburantMap;
+}
+
+
+export{sortMaker,createVignette,showMarkers,hideMarkers, formateDataHistorique}

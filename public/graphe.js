@@ -1,11 +1,12 @@
-function createGraphique() {
-    let data = [
-        { x: 1, y: 2.2 },
-        { x: 2, y: 2.4 },
-        { x: 3, y: 2.1 },
-        { x: 4, y: 1.8 },
-        { x: 5, y: 1.0 }
-    ];
+function createGraphique(data) {
+    
+    // let data = [
+    //     { x: 1, y: 2.2 },
+    //     { x: 2, y: 2.4 },
+    //     { x: 3, y: 2.1 },
+    //     { x: 4, y: 1.8 },
+    //     { x: 5, y: 1.0 }
+    // ];
 
     let div = document.createElement("div");
 
@@ -29,7 +30,7 @@ function createGraphique() {
     }
 
     function convertY(y) {
-        return canvas.height - (y / 5) * canvas.height;
+        return canvas.height - (y / 3) * canvas.height;
     }
 
     function drawXAxis() {
@@ -55,8 +56,8 @@ function createGraphique() {
         ctx.lineTo(0, canvas.height);
         ctx.stroke();
 
-        for (let i = 0; i <= 5; i++) {
-            let yPosition = (i / 5) * canvas.height;
+        for (let i = 0; i <= 3; i++) {
+            let yPosition = (i / 3) * canvas.height;
 
             ctx.moveTo(-5, yPosition);
             ctx.lineTo(5, yPosition);
@@ -84,7 +85,7 @@ function createGraphique() {
         ctx.stroke();
 
         ctx.fillText("jour: " + (mouseX / canvas.width * 20).toFixed(2), mouseX + 10, canvas.height / 2 - 10);
-        ctx.fillText("prix € : " + ((canvas.height - mouseY) / canvas.height * 5).toFixed(2), canvas.width / 2 + 10, mouseY + 10);
+        ctx.fillText("prix € : " + ((canvas.height - mouseY) / canvas.height * 3).toFixed(3), canvas.width / 2 + 10, mouseY + 10);
     }
 
     canvas.addEventListener("mousemove", showCoordinates);

@@ -1,6 +1,6 @@
 import { logoStationVert, logoStationJaune, logoStationRouge,logoStationBleu } from "./logo.js";
 import { createGraphique } from "./graphe.js";
-import { sortMaker,createVignette,showMarkers,hideMarkers } from "./utils.js";
+import { sortMaker,createVignette,showMarkers,hideMarkers, formateDataHistorique } from "./utils.js";
 var latParis = 48.866667;
 var longParis = 2.333333;
 var map = L.map("map").setView([latParis, longParis], 13);
@@ -66,7 +66,6 @@ function fetchResults() {
     })
     .then((data) => {
 
-      console.log("offset : "+offset+ " resulte par page :"+ resultsPerPage);
       let stations = data.results;
       if(offset>=9999){
         putStationsMarkers(stations, markers);
@@ -123,19 +122,44 @@ function putStationsMarkers(stations, markersCluster) {
 
   for (let i = 0; i < stations.length; i++) {
     currentStation = stations[i];
+    let vignette = createVignette(currentStation);
     let newMarker = L.marker(
       [currentStation.geom.lat, currentStation.geom.lon],
       {
         icon: logoStationBleu,
       }
     )
-      .bindPopup(createVignette(currentStation))
+      .bindPopup(vignette)
       .openPopup();
 
     markersCluster.addLayer(newMarker);
     sortMaker(newMarker,currentStation,AllMarkers);
+    
+    newMarker.addEventListener("click", () => {
+      if (vignette.hasAttribute("clicked")) {
+        return;
+      }
+      vignette.setAttribute("clicked", "");
+      // newMarker._popup.setContent(createVignette(currentStation))
+      // ----------- faire en sorte que ça requête les 20 derniers jours et pas les 20 derniers carburants
+      fetch(`http://localhost:3000/getStation?id=${vignette.id}`).then(res => res.json()).then(data => {
+        // console.log(data);
+        let canvaContainer = document.createElement("div");
+        canvaContainer.classList.add("canvaContainer");
 
+        let dataMap = (formateDataHistorique(data));
+        for (const [key, value] of dataMap) {
+          let canva = createGraphique(value);
+          canva.id = key
+          canvaContainer.appendChild(canva);
+          console.log(value);
+        }
+        canvaContainer.childNodes.forEach((child) => child.style.visibility = "hidden");
+        canvaContainer.firstChild.style.visibility = "visible";
+        vignette.appendChild(canvaContainer);
 
+      })
+    })
   }
   map.addLayer(markersCluster);
 }
