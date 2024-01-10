@@ -44,7 +44,38 @@ var geocoder = L.Control.geocoder({
     });
   })
   .addTo(map);
+  function onLocationFound(e) {
+    var redIcon = new L.Icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    var radius = e.accuracy;
 
+    L.marker(e.latlng,{icon:redIcon}).addTo(map).openPopup();
+}
+function onLocationError(e) {
+  alert(e.message);
+}
+
+function WantLocate(){
+  if(confirm("Voulez-voulez qu'on utilise votre localisation")){
+    map.locate({setView: true, maxZoom: 19});
+    map.on('locationfound', onLocationFound);
+    buttonlocate.removeEventListener("click",WantLocate)
+    buttonlocate.addEventListener("click",dontWantLocate)
+  }
+  map.on('locationerror', onLocationError);
+}
+function dontWantLocate(){
+  map.setView([latParis, longParis],13);
+  buttonlocate.removeEventListener("click",dontWantLocate)
+  buttonlocate.addEventListener("click",WantLocate)
+}
+buttonlocate.addEventListener("click",WantLocate)
 
 const apiUrl ="https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records";
 let resultsPerPage = 100;
