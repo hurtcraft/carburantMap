@@ -184,10 +184,13 @@ function putStationsMarkers(stations, markersCluster) {
           let canva = createGraphique(value);
           canva.id = key
           canvaContainer.appendChild(canva);
-          console.log(value);
+          // console.log(value);
         }
         canvaContainer.childNodes.forEach((child) => child.style.visibility = "hidden");
-        canvaContainer.firstChild.style.visibility = "visible";
+        if (!canvaContainer.firstChild) {
+          return;
+        }
+        // canvaContainer.firstChild.style.visibility = "visible";    
         vignette.appendChild(canvaContainer);
 
       })

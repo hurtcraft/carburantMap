@@ -64,6 +64,8 @@ db.connect((err) => {
       }
     })
 
+    // -------------------------------- Ces requêtes permettent d'afficher les entrées de la table historique d'aujourd'hui ainsi que de les supprimer
+
     // db.query(`SELECT * FROM historique WHERE DateCarburant = '${today}'`, (err, results) => {
     //   if (err) {
     //     console.error('Erreur lors de l\'exécution de la requête :', err);
@@ -80,7 +82,7 @@ db.connect((err) => {
     //     console.log(results)
     //   }
     // })
-
+    // --------------------------------
   }
 });
 
@@ -100,6 +102,11 @@ function formateUneStationPourStationDB(station) {
   return [[station.id, station.geom.lon, station.geom.lat, station.cp, station.adresse]];
 }
 
+/**
+ * 
+ * @param {*} stations kjdsq
+ * @description Permet d'inserer initialement toutes les stations dans la base de données
+ */
 function addStationToDataBase(stations) {
   if (stations.length === 0 ) {
     return;
@@ -119,7 +126,11 @@ function addStationToDataBase(stations) {
 const apiUrl ="https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records";
 let resultsPerPage = 100;
 let offset = 0;
-
+/**
+ * 
+ * @param {*} functionToCall 
+ * @description Permet de requêter toutes les stations grâce à l'API
+ */
 function fetchResults(functionToCall) {
   const urlWithPagination = `${apiUrl}?limit=${resultsPerPage}&offset=${offset}`;
 
@@ -160,7 +171,12 @@ function fetchResults(functionToCall) {
 // fetchResults(addStationToDataBase);
 
 
-
+/**
+ * 
+ * @param {*} stations 
+ * @returns {Array} Une liste formate des stations pour pouvoir les inserer dans la table historique avec le format :     
+ * [[idStation, idCarburant, prixCarburant, dateCarburant], etc...]
+ */
 function formateStationsHistorique(stations) {
   let stationsFormate = [];
   for (const station of stations) {
@@ -175,7 +191,11 @@ function formateStationsHistorique(stations) {
   }
   return stationsFormate;
 }
-
+/**
+ * 
+ * @param {*} station 
+ * @description Le même comportement que formateStationsHistorique mais que pour une seule station
+ */
 function formateUneStationHistorique(station) {
   if (station.carburants_disponibles === null){
     return []
@@ -194,8 +214,8 @@ let nbTotalHisto = 0;
 const errNoForeign = 1452;
 /**
  * 
- * @param {[[{}]]} stationsIn 
- * ajoute les stations à l'historique et à la table station si besoin
+ * @param {[[{}]]} stationsIn station à ajouter
+ * @description Ajoute les stations à l'historique et à la table station si besoin
  */
 function addHistorique(stationsIn) {
   for (const stations of stationsIn) {
@@ -262,51 +282,9 @@ function logNbHisto(stationsIn) {
   console.log(nbHisto);
 }
 
-// -------------------à lancer quand vous voulez mettre a jour la BD
+// -------------------décommenter fetchResults(addHistorique); quand vous voulez mettre a jour la BD, soit une fois par jour
 // fetchResults(addHistorique);
 // fetchResults(logNbHisto);
-
-function traitementStationRejete() {
-  if (stationsRejeteHistorique.length === 0) return;
-  for (const stations of stationsRejeteHistorique) {
-    for (const station of stations) {
-      let selectQuery = `SELECT * FROM station WHERE IdStation = ${station.id};`;
-      db.query(selectQuery, (err, result) => {
-        if (err) {
-          console.log("erreur traitement des stations rejeté");
-          throw err;
-        }
-        console.log(result);
-        if (result.length > 0) {
-          insertStationInHistorique(station);
-          return;
-        }
-        let insertQuery = `INSERT INTO station (IdStation, LonStation, LatStation, CPStation, AdresseStation) VALUES (${station.id}, ${station.geom.lon}, ${station.geom.lat}, ${station.cp}, '${station.adresse}')`;
-        db.query(insertQuery, (err, result) => {
-          if (err) {
-            console.log("?? erreur insertion station dans stations rejeté?");
-            throw err;
-          }
-          insertStationInHistorique(station);
-        });
-      });
-
-    }
-  }
-}
-
-function insertStationInHistorique(station) {
-  let stationFormate = formateUneStationHistorique(station);
-  if (stationFormate.length === 0) return;
-  db.query(historiqueInsertQuery, [stationFormate], (err, result) => {
-    if (err) {
-      console.log("Erreur d'insertion dans historique");
-      throw err;
-    }
-    console.log("bien insérer dans histo");
-  })
-}
-
 
 // Exemple de route pour récupérer des données depuis la base de données
 
@@ -316,6 +294,10 @@ app.listen(port, () => {
   console.log(`Serveur Express en écoute sur le port ${port}`);
 });
 
+/**
+ * Création de la route /getStation, elle intérroge notre base de données local
+ * Pour utiliser cette API il faut faire 'nomDuSite'/getStation?id='idStation'
+ */
 app.get("/getStation", (req, res) => {
   if (req.query.id === undefined) {
     res.send("pour utiliser cette API il faut faire 'nomDuSite'/getStation?id='idStation'\nLa requête renvoie un objet")
